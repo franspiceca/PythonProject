@@ -1,0 +1,4 @@
+import pandas as pd
+
+df = pd.read_csv("pls_fy18_state_pud18i.csv")
+df.head()
