@@ -71,5 +71,17 @@ t3 = sns.lmplot(x='TOTAL_LIB', y='TOTSTAFF', data=df)
 t3.set(xlabel='Total Libraries', ylabel='Total Staff', title= 'Total Libraries vs Total Staff')
 plt.show()
 
+##Bar chart
+libtypecat = df[["LOCGVT", "STGVT", "FEDGVT","OTHINCM", "STABR"]]
+libtypecat.set_index("STABR").plot.bar(stacked=True, grid=True, figsize=(15,7))
+plt.xlabel('State')
+plt.ylabel('Total Funding')
+plt.title('States vs. Total Funding')
+plt.show()
 
+##Bubble Chart
+import cufflinks as cf
+
+t2=df[["TOTINCM", "POPU_ST", "TOTAL_LIB", "TOTSTAFF", "STABR"]]
+plyo.iplot(t2.iplot(asFigure=True, kind="bubble", x="TOTINCM", y="POPU_ST", size="TOTAL_LIB", text="STABR", xTitle="Total Income", yTitle="State Population"))
 
