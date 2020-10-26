@@ -34,3 +34,42 @@ import plotly.offline as plyo
 df[["CENTLIB", "BRANLIB", "BKMOB"]].plot(kind="hist", grid=True, figsize=(15,7))
 plt.title('Number of Different Types of Libaries')
 plt.show()
+
+
+##Correlation plot
+def createCorrelationPlot(df):
+    sns.set(style="dark")
+    corr = df.corr()
+
+    mask = np.triu(np.ones_like(corr, dtype=np.bool))
+
+    f, ax = plt.subplots(figsize=(11, 9))
+
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    sns.heatmap(df.corr()
+                ,mask=np.triu(np.ones_like(df.corr(), dtype=np.bool))
+                ,cmap=sns.diverging_palette(220, 10, as_cmap=True)
+                ,vmax=.3, center=0
+                ,square=True, linewidths=.5, cbar_kws={"shrink": .5})
+    plt.show()
+    
+createCorrelationPlot(df[["CENTLIB", "TOTINCM", "TOTSTAFF"]])
+
+##Seaborn plots
+df['TOTAL_LIB']=df['CENTLIB'] + df['BRANLIB'] + df['BKMOB']
+
+t1 = sns.lmplot(x='TOTAL_LIB', y='TOTINCM', data=df)
+t1.set(xlabel='Total Libraries', ylabel='Total Income', title='Total Libraries vs Total Income')
+plt.show()
+
+t2 = sns.lmplot(x='TOTAL_LIB', y='POPU_ST', data=df)
+t2.set(xlabel='Total Libraries', ylabel='State Population', title='Total Libraries vs State Population')
+plt.show()
+
+t3 = sns.lmplot(x='TOTAL_LIB', y='TOTSTAFF', data=df)
+t3.set(xlabel='Total Libraries', ylabel='Total Staff', title= 'Total Libraries vs Total Staff')
+plt.show()
+
+
+
