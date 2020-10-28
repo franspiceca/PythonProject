@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+
+##Reading file, Converting dates to datetime format
+df = pd.read_csv("pls_fy18_state_pud18i.csv", parse_dates=['STARTDAT','ENDDATE'])
+
+##Creating dictionary to have index position for each column head
+col_mapping_dict = {c[0]:c[1] for c in enumerate(df.columns)}
+col_mapping_dict
+
+##Cutting out unneeded columns from the data frame
+df = df.iloc[:, np.r_[0,1,4,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,59,61,63,65,67,69,71,73,75,77,79,81,83,85,117,119,127,128]]
+
+##Removing entries with any null values (in this set, "-1" means value is missing)
+df = df[df['TOTSTAFF'] >= 0]
+
+#Changing to categorical for testing/ML
+df.OBEREG = pd.Categorical(df.OBEREG)
+df.OBEREG = df.OBEREG.cat.codes
+
+##Drop columns that are territories/not states: Guam, American Samoa, Northern Mariana Islands & D.C.
+df = df.drop(df.index[[3,8,12,27]])
+
+##Investigating new dataset
+df.head()
+
+from sklearn.model_selection import train_test_split 
+from sklearn.linear_model import LinearRegression
+
+##Setting up features and target value
+features = df[["POPU_LSA", "POPU_ST", "CENTLIB", "BRANLIB", "BKMOB", "TOTSTAFF"]]
+target = df.TOTINCM
+
+##Setting indepentdent and dependent variables
+X = features
+y = target
+
+##Setting test sample size and random seed for linear regression
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+
+##Defining linear regression model to use later on as lr
+lr=LinearRegression()
+
+##Fitting training data
+lr.fit(X_train, y_train)
+
+##Scoring training data
+lr.score(X_train, y_train)
+
+##Scorring testing data
+lr.score(X_test, y_test)
+
+##Setting variable to predict testing data for later use
+preds = lr.predict(X_test)
+
+import math
+from sklearn.metrics import explained_variance_score, mean_absolute_error, r2_score, mean_squared_error
+
+##User defined function that gets score, mae, RSME and R2 for testing data
+def get_all_scores(y_test, preds):
+    score = explained_variance_score(y_test, preds)
+    mae = mean_absolute_error(y_test, preds)
+    RMSE = math.sqrt(mean_squared_error(y_test, preds))
+    R2 = r2_score(y_test, preds)
+    return print("score = {:.5f} | MAE = {:.3f} | RMSE = {:.3f} | R2 = {:.5f}".format(score, mae, RMSE, R2))
+
+get_all_scores(y_test, preds)
+
+##Gets y-intercept and coefficents
+print(lr.intercept_)
+print(lr.coef_)
+
+##Testing observation to see how close our model is
+obs1 = {   "POPU_LSA": 50000, 
+           "POPU_ST": 50000,
+           "CENTLIB": 200,
+           "BRANLIB": 70,
+           "BKMOB": 10, 
+           "TOTSTAFF": 1500}
+
+new_fund = [obs1["POPU_LSA"], obs1["POPU_ST"], obs1["CENTLIB"], 
+            obs1["BRANLIB"], obs1["BKMOB"], obs1["TOTSTAFF"],]
+X_new = [new_fund]
+
+##Running prediction score on observation we defined above
+lr.predict(X_new)
